@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Reviews - TaskForge{% endblock %}
+{% block main %}
+<h1>Reviews</h1>
+<p class="lead">Items waiting for a person. A person can only tighten: anything an executed gate rejected never appears here.</p>
+<p>{% if stage or run_id %}<a href="/reviews">All stages</a> · {% endif %}{% for s in stages %}<a href="/reviews?stage={{ s }}">{{ s }}</a>{% if not loop.last %} · {% endif %}{% endfor %}</p>
+{% if items %}
+<table><tr><th>Stage</th><th>Item</th><th>Automatic decision</th><th>Run</th><th></th></tr>
+{% for i in items %}<tr><td>{{ i.stage }}</td><td class="mono">{{ i.item_id }}</td><td>{{ i.auto_decision }}</td>
+  <td><a class="mono" href="/runs/{{ i.run_id }}">{{ i.run_id }}</a></td><td><a href="/reviews/{{ i.review_id }}">Review</a></td></tr>{% endfor %}
+</table>
+{% else %}
+<div class="panel muted">Nothing is waiting{% if stage %} at {{ stage }}{% endif %}.</div>
+{% endif %}
+{% endblock %}

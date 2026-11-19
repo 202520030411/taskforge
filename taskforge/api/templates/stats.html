@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Review stats - TaskForge{% endblock %}
+{% block main %}
+<h1>Review stats</h1>
+<p class="lead">How often people decided differently from the automatic side, per stage. A stage that stays near 0 can be sampled less; a stage that stays high means its automatic step needs work.</p>
+{% if disagreement %}
+<table><tr><th>Stage</th><th class="num">Reviews</th><th class="num">Disagreed</th><th class="num">Minutes</th><th>Reason codes</th></tr>
+{% for stage, d in disagreement.items() %}<tr><td>{{ stage }}</td><td class="num">{{ d.n }}</td><td class="num">{{ '%.0f'|format(d.rate * 100) }}%</td><td class="num">{{ d.minutes }}</td>
+  <td>{% for code, n in reasons.get(stage, {}).items() %}<span class="badge">{{ n }} × {{ code|replace('_', ' ') }}</span> {% endfor %}</td></tr>{% endfor %}
+</table>
+{% else %}<div class="panel muted">No reviews have been decided yet.</div>{% endif %}
+{% endblock %}

@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "taskforge"
+version = "0.0.1"
+description = "Data-production platform; first workflow: failure-driven task synthesis for coding agents"
+requires-python = ">=3.11"
+dependencies = ["pydantic>=2"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "pyflakes"]
+# everything the platform layer needs beyond the pure-Python core
+platform = [
+    "psycopg[binary,pool]>=3.2",
+    "fastapi>=0.115",
+    "uvicorn>=0.30",
+    "jinja2>=3.1",
+    "python-multipart>=0.0.9",
+    "httpx>=0.27",
+    "prometheus-client>=0.20",
+    "opentelemetry-sdk>=1.27",
+    "opentelemetry-exporter-otlp-proto-http>=1.27",
+    "minio>=7.2",
+    "mcp>=1.2",
+    "anthropic>=2",
+]
+
+[tool.setuptools.packages.find]
+include = ["taskforge*"]
+
+[tool.setuptools.package-data]
+taskforge = ["taskgen/prompts/*.md", "api/templates/*.html"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

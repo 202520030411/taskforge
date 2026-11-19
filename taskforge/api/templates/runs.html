@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block main %}
+<h1>Runs</h1>
+<p class="lead">Each run is one batch going through the task-generation workflow.</p>
+{% if runs %}
+<table>
+  <tr><th>Run</th><th>Status</th><th>Steps</th><th>Waiting for</th><th class="num">Spent</th><th class="num">Budget</th></tr>
+  {% for r in runs %}
+  <tr>
+    <td><a class="mono" href="/runs/{{ r.id }}">{{ r.id }}</a></td>
+    <td><span class="badge {{ r.status }}">{{ r.status }}</span>{% if r.summary.finished %} <span class="muted">finished</span>{% endif %}</td>
+    <td>{% for status, n in r.summary.counts.items() %}<span class="badge {{ status }}">{{ n }} {{ status|lower }}</span> {% endfor %}</td>
+    <td>{% if r.summary.waiting_on_signals %}{{ r.summary.waiting_on_signals|length }} review(s){% elif r.summary.blocked_paid_steps %}paid approval{% else %}<span class="muted">-</span>{% endif %}</td>
+    <td class="num">{{ r.spent_usd|money }}</td>
+    <td class="num">{% if r.paid_approved %}{{ r.budget_usd|money }}{% else %}<span class="muted">not approved</span>{% endif %}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+<div class="panel muted">No runs yet.</div>
+{% endif %}
+{% endblock %}

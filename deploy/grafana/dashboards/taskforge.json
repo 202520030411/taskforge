@@ -1,0 +1,786 @@
+{
+ "uid": "taskforge",
+ "title": "TaskForge",
+ "timezone": "America/New_York",
+ "schemaVersion": 39,
+ "version": 1,
+ "refresh": "5s",
+ "time": {
+  "from": "now-30m",
+  "to": "now"
+ },
+ "panels": [
+  {
+   "id": 1,
+   "title": "Steps waiting, by resource class",
+   "type": "timeseries",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "description": "Queue length. Paid classes also count steps of runs that are not approved yet.",
+   "gridPos": {
+    "x": 0,
+    "y": 0,
+    "w": 12,
+    "h": 7
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "expr": "sum by (resource) (taskforge_steps{status=\"PENDING\"})",
+     "legendFormat": "{{resource}}",
+     "refId": "A"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "min": 0
+    },
+    "overrides": []
+   }
+  },
+  {
+   "id": 2,
+   "title": "Steps running, by resource class",
+   "type": "timeseries",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "description": "",
+   "gridPos": {
+    "x": 12,
+    "y": 0,
+    "w": 12,
+    "h": 7
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "expr": "sum by (resource) (taskforge_steps{status=\"RUNNING\"})",
+     "legendFormat": "{{resource}}",
+     "refId": "A"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "min": 0
+    },
+    "overrides": []
+   }
+  },
+  {
+   "id": 3,
+   "title": "Steps finished per second",
+   "type": "timeseries",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "description": "",
+   "gridPos": {
+    "x": 0,
+    "y": 7,
+    "w": 12,
+    "h": 7
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "expr": "sum(rate(taskforge_step_transitions_total{to_status=\"SUCCEEDED\"}[1m]))",
+     "legendFormat": "succeeded",
+     "refId": "A"
+    },
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "expr": "sum(rate(taskforge_step_transitions_total{to_status=\"FAILED\"}[1m]))",
+     "legendFormat": "failed",
+     "refId": "B"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "ops",
+     "min": 0
+    },
+    "overrides": []
+   }
+  },
+  {
+   "id": 4,
+   "title": "Oldest step waiting to be picked up",
+   "type": "timeseries",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "description": "If this keeps growing for one class, that class needs more worker threads or more sandbox capacity.",
+   "gridPos": {
+    "x": 12,
+    "y": 7,
+    "w": 12,
+    "h": 7
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "expr": "taskforge_queue_oldest_seconds",
+     "legendFormat": "{{resource}}",
+     "refId": "A"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "s",
+     "min": 0
+    },
+    "overrides": []
+   }
+  },
+  {
+   "id": 5,
+   "title": "Leases expired",
+   "type": "stat",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "description": "Steps whose worker stopped renewing its claim; another worker ran them again.",
+   "gridPos": {
+    "x": 0,
+    "y": 14,
+    "w": 6,
+    "h": 4
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "expr": "taskforge_lease_expired_total",
+     "legendFormat": "taken over",
+     "refId": "A"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "min": 0
+    },
+    "overrides": []
+   },
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    },
+    "colorMode": "value",
+    "graphMode": "none",
+    "textMode": "value_and_name"
+   }
+  },
+  {
+   "id": 6,
+   "title": "Commits refused (fenced)",
+   "type": "stat",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "description": "A worker tried to write a result after losing its claim. Refusing it is the correct outcome.",
+   "gridPos": {
+    "x": 6,
+    "y": 14,
+    "w": 6,
+    "h": 4
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "expr": "taskforge_fenced_commits_total",
+     "legendFormat": "fenced",
+     "refId": "A"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "min": 0
+    },
+    "overrides": []
+   },
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    },
+    "colorMode": "value",
+    "graphMode": "none",
+    "textMode": "value_and_name"
+   }
+  },
+  {
+   "id": 7,
+   "title": "Retries after faults",
+   "type": "stat",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "description": "",
+   "gridPos": {
+    "x": 12,
+    "y": 14,
+    "w": 6,
+    "h": 4
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "expr": "taskforge_step_retries_total",
+     "legendFormat": "retries",
+     "refId": "A"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "min": 0
+    },
+    "overrides": []
+   },
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    },
+    "colorMode": "value",
+    "graphMode": "none",
+    "textMode": "value_and_name"
+   }
+  },
+  {
+   "id": 8,
+   "title": "Requests paid twice",
+   "type": "stat",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "description": "",
+   "gridPos": {
+    "x": 18,
+    "y": 14,
+    "w": 6,
+    "h": 4
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "expr": "taskforge_double_charges",
+     "legendFormat": "must be 0",
+     "refId": "A"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "min": 0
+    },
+    "overrides": []
+   },
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    },
+    "colorMode": "value",
+    "graphMode": "none",
+    "textMode": "value_and_name"
+   }
+  },
+  {
+   "id": 9,
+   "title": "Sandboxes",
+   "type": "timeseries",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "description": "",
+   "gridPos": {
+    "x": 0,
+    "y": 18,
+    "w": 12,
+    "h": 7
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "expr": "taskforge_sandbox_in_use",
+     "legendFormat": "in use",
+     "refId": "A"
+    },
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "expr": "taskforge_sandbox_idle",
+     "legendFormat": "pre-started, idle",
+     "refId": "B"
+    },
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "expr": "taskforge_sandbox_creating",
+     "legendFormat": "starting",
+     "refId": "C"
+    },
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "expr": "taskforge_sandbox_capacity",
+     "legendFormat": "capacity",
+     "refId": "D"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "min": 0
+    },
+    "overrides": []
+   }
+  },
+  {
+   "id": 10,
+   "title": "Sandbox hand-out time (95% under)",
+   "type": "timeseries",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "description": "pool = handed a pre-started container; cold = had to start one.",
+   "gridPos": {
+    "x": 12,
+    "y": 18,
+    "w": 12,
+    "h": 7
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "expr": "histogram_quantile(0.95, sum by (le, source) (rate(taskforge_sandbox_start_seconds_bucket[1m])))",
+     "legendFormat": "{{source}}",
+     "refId": "A"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "s",
+     "min": 0
+    },
+    "overrides": []
+   }
+  },
+  {
+   "id": 11,
+   "title": "Sandbox hand-outs per second",
+   "type": "timeseries",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "description": "",
+   "gridPos": {
+    "x": 0,
+    "y": 25,
+    "w": 12,
+    "h": 7
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "expr": "sum by (source) (rate(taskforge_sandbox_start_seconds_count[1m]))",
+     "legendFormat": "{{source}}",
+     "refId": "A"
+    },
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "expr": "rate(taskforge_sandbox_busy_total[1m])",
+     "legendFormat": "refused: full",
+     "refId": "B"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "ops",
+     "min": 0
+    },
+    "overrides": []
+   }
+  },
+  {
+   "id": 12,
+   "title": "Command time in sandboxes (95% under)",
+   "type": "timeseries",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "description": "",
+   "gridPos": {
+    "x": 12,
+    "y": 25,
+    "w": 12,
+    "h": 7
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "expr": "histogram_quantile(0.95, sum by (le) (rate(taskforge_sandbox_exec_seconds_bucket[1m])))",
+     "legendFormat": "exec",
+     "refId": "A"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "s",
+     "min": 0
+    },
+    "overrides": []
+   }
+  },
+  {
+   "id": 13,
+   "title": "Dollars spent",
+   "type": "timeseries",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "description": "",
+   "gridPos": {
+    "x": 0,
+    "y": 32,
+    "w": 12,
+    "h": 7
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "expr": "taskforge_spent_usd_total",
+     "legendFormat": "spent",
+     "refId": "A"
+    },
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "expr": "taskforge_reserved_usd",
+     "legendFormat": "reserved for calls in flight",
+     "refId": "B"
+    },
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "expr": "taskforge_budget_usd",
+     "legendFormat": "approved budget",
+     "refId": "C"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "currencyUSD",
+     "min": 0
+    },
+    "overrides": []
+   }
+  },
+  {
+   "id": 14,
+   "title": "Dollars by role",
+   "type": "timeseries",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "description": "",
+   "gridPos": {
+    "x": 12,
+    "y": 32,
+    "w": 12,
+    "h": 7
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "expr": "taskforge_llm_cost_usd_total",
+     "legendFormat": "{{role}}",
+     "refId": "A"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "currencyUSD",
+     "min": 0
+    },
+    "overrides": []
+   }
+  },
+  {
+   "id": 15,
+   "title": "Model calls per second",
+   "type": "timeseries",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "description": "",
+   "gridPos": {
+    "x": 0,
+    "y": 39,
+    "w": 12,
+    "h": 7
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "expr": "sum by (cached) (rate(taskforge_llm_calls_total[1m]))",
+     "legendFormat": "from cache: {{cached}}",
+     "refId": "A"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "ops",
+     "min": 0
+    },
+    "overrides": []
+   }
+  },
+  {
+   "id": 16,
+   "title": "Waiting for a person, by stage",
+   "type": "timeseries",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "description": "",
+   "gridPos": {
+    "x": 12,
+    "y": 39,
+    "w": 12,
+    "h": 7
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "expr": "taskforge_reviews_pending",
+     "legendFormat": "{{stage}}",
+     "refId": "A"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "min": 0
+    },
+    "overrides": []
+   }
+  },
+  {
+   "id": 17,
+   "title": "Gate results",
+   "type": "stat",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "description": "",
+   "gridPos": {
+    "x": 0,
+    "y": 46,
+    "w": 12,
+    "h": 5
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "expr": "taskforge_gate_results",
+     "legendFormat": "{{gate}} passed={{passed}}",
+     "refId": "A"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "min": 0
+    },
+    "overrides": []
+   },
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    },
+    "colorMode": "value",
+    "graphMode": "none",
+    "textMode": "value_and_name"
+   }
+  },
+  {
+   "id": 18,
+   "title": "Task decisions",
+   "type": "stat",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "description": "",
+   "gridPos": {
+    "x": 12,
+    "y": 46,
+    "w": 12,
+    "h": 5
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "expr": "taskforge_task_decisions",
+     "legendFormat": "{{decision}}",
+     "refId": "A"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "min": 0
+    },
+    "overrides": []
+   },
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    },
+    "colorMode": "value",
+    "graphMode": "none",
+    "textMode": "value_and_name"
+   }
+  },
+  {
+   "id": 19,
+   "title": "Step run time, last 15 min (95% under)",
+   "type": "timeseries",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "description": "",
+   "gridPos": {
+    "x": 0,
+    "y": 51,
+    "w": 24,
+    "h": 7
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "expr": "taskforge_step_duration_seconds{quantile=\"0.95\"}",
+     "legendFormat": "{{step}}",
+     "refId": "A"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "s",
+     "min": 0
+    },
+    "overrides": []
+   }
+  }
+ ],
+ "tags": [
+  "taskforge"
+ ]
+}

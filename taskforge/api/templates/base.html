@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}TaskForge{% endblock %}</title>
+<style>
+  :root { --bg:#fbfaf7; --panel:#fff; --ink:#1d1c1a; --muted:#6b6862; --line:#e4e1da; --accent:#1f5f8b; --ok:#2c7a4b; --bad:#b3372f; --warn:#a56a00; --code:#f3f1ec; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#161513; --panel:#1f1e1b; --ink:#ece9e2; --muted:#a09c93; --line:#34322d; --accent:#7db8de; --ok:#6fc58f; --bad:#ef8f86; --warn:#e0b25a; --code:#262521; } }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 -apple-system, "Segoe UI", system-ui, sans-serif; }
+  nav { display:flex; gap:20px; align-items:center; padding:12px 24px; border-bottom:1px solid var(--line); background:var(--panel); }
+  nav .brand { font-weight:650; letter-spacing:.2px; }
+  nav a { color:var(--ink); text-decoration:none; } nav a:hover { color:var(--accent); }
+  nav .count { background:var(--accent); color:var(--panel); border-radius:10px; padding:1px 8px; font-size:12px; margin-left:4px; }
+  main { max-width:1080px; margin:0 auto; padding:24px 24px 64px; }
+  h1 { font-size:22px; margin:0 0 4px; } h2 { font-size:16px; margin:28px 0 8px; }
+  p.lead { color:var(--muted); margin:0 0 16px; }
+  a { color:var(--accent); }
+  table { width:100%; border-collapse:collapse; background:var(--panel); border:1px solid var(--line); border-radius:6px; overflow:hidden; }
+  th, td { text-align:left; padding:7px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { font-size:12px; text-transform:uppercase; letter-spacing:.4px; color:var(--muted); font-weight:600; }
+  tr:last-child td { border-bottom:none; }
+  td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
+  code, pre, .mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size:13px; }
+  pre { background:var(--code); border:1px solid var(--line); border-radius:6px; padding:10px 12px; overflow:auto; max-height:420px; white-space:pre-wrap; word-break:break-word; margin:6px 0 14px; }
+  .badge { display:inline-block; padding:1px 8px; border-radius:10px; font-size:12px; border:1px solid var(--line); color:var(--muted); }
+  .badge.SUCCEEDED, .badge.ACTIVE, .badge.ACCEPT { color:var(--ok); border-color:var(--ok); }
+  .badge.FAILED, .badge.CANCELLED, .badge.REJECT { color:var(--bad); border-color:var(--bad); }
+  .badge.WAITING, .badge.PAUSED_BUDGET, .badge.REVIEW, .badge.RUNNING { color:var(--warn); border-color:var(--warn); }
+  .panel { background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:14px 16px; margin:0 0 14px; }
+  .row { display:flex; gap:14px; flex-wrap:wrap; } .row > .panel { flex:1 1 220px; }
+  .big { font-size:22px; font-weight:600; font-variant-numeric:tabular-nums; } .muted { color:var(--muted); }
+  form.inline { display:inline-flex; gap:8px; align-items:center; margin:0; }
+  input, select, textarea, button { font:inherit; color:inherit; background:var(--panel); border:1px solid var(--line); border-radius:5px; padding:6px 9px; }
+  textarea { width:100%; min-height:90px; font-family: ui-monospace, Menlo, monospace; font-size:13px; }
+  button { cursor:pointer; background:var(--accent); color:var(--panel); border-color:var(--accent); }
+  button.plain { background:var(--panel); color:var(--ink); border-color:var(--line); }
+  label.opt { display:block; padding:5px 0; } fieldset { border:1px solid var(--line); border-radius:6px; margin:0 0 14px; padding:10px 14px; }
+  legend { color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.4px; padding:0 6px; }
+  .error { border-color:var(--bad); color:var(--bad); }
+  details { margin:4px 0; } summary { cursor:pointer; }
+</style>
+</head>
+<body>
+<nav>
+  <span class="brand">TaskForge</span>
+  <a href="/">Runs</a>
+  <a href="/reviews">Reviews{% if pending_total %}<span class="count">{{ pending_total }}</span>{% endif %}</a>
+  <a href="/stats">Review stats</a>
+</nav>
+<main>{% block main %}{% endblock %}</main>
+</body>
+</html>

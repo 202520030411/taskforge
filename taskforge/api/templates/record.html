@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}{{ rec.KIND }} - TaskForge{% endblock %}
+{% block main %}
+<h1>{{ rec.KIND|replace('_', ' ') }}</h1>
+<p class="lead mono">{{ rec.id }}{% if rec.produced_by %} · made by step run {{ rec.produced_by }}{% endif %}</p>
+
+<h2>Made from</h2>
+{% if ancestors %}
+<table><tr><th>Kind</th><th>Record</th></tr>
+{% for a in ancestors %}<tr><td>{{ a.KIND|replace('_', ' ') }}{% if a.id in rec.parents %} <span class="badge">direct</span>{% endif %}</td><td><a class="mono" href="/records/{{ a.id }}">{{ a.id }}</a></td></tr>{% endfor %}
+</table>
+{% else %}<div class="panel muted">Nothing: this record is an input.</div>{% endif %}
+
+{% if children %}
+<h2>Used by</h2>
+<table><tr><th>Kind</th><th>Record</th></tr>
+{% for c in children %}<tr><td>{{ c.KIND|replace('_', ' ') }}</td><td><a class="mono" href="/records/{{ c.id }}">{{ c.id }}</a></td></tr>{% endfor %}
+</table>
+{% endif %}
+
+{% if files %}
+<h2>Task files</h2>
+{% for path, content in files.items() %}<details {% if path == 'instruction.md' %}open{% endif %}><summary class="mono">{{ path }}</summary><pre>{{ content }}</pre></details>{% endfor %}
+{% endif %}
+
+<h2>Content</h2>
+<pre style="max-height:640px">{{ body|pretty }}</pre>
+{% endblock %}

@@ -1,0 +1,12 @@
+version = "1.0"
+
+[metadata]
+difficulty = "easy"
+tags = ["csv", "data-cleaning", "self-check"]
+target_pattern = "declares the task done after checking only the visible sample, missing stated edge cases"
+
+[verifier]
+timeout_sec = 120
+
+[agent]
+timeout_sec = 1200

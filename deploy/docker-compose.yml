@@ -1,0 +1,72 @@
+# Backing services for TaskForge. Every port is bound to 127.0.0.1: reach them through an SSH tunnel.
+# Workers, the api and sandboxd run as host processes (see stack.sh); sandboxd is the only one that touches Docker.
+name: taskforge
+
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: taskforge
+      POSTGRES_PASSWORD: ${TASKFORGE_PG_PASSWORD:?run deploy/stack.sh, which creates deploy/.env}
+      POSTGRES_DB: taskforge
+    command: ["postgres", "-c", "max_connections=300"]
+    ports: ["127.0.0.1:54329:5432"]
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U taskforge -d taskforge"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  # S3-compatible blob store. (MinIO's images are no longer published; SeaweedFS speaks the same API.)
+  s3:
+    image: chrislusf/seaweedfs:latest
+    restart: unless-stopped
+    command: ["server", "-dir=/data", "-s3", "-s3.config=/etc/seaweedfs/s3.json", "-master.volumeSizeLimitMB=1024"]
+    ports: ["127.0.0.1:59000:8333"]
+    volumes:
+      - s3data:/data
+      - ./s3.json:/etc/seaweedfs/s3.json:ro      # written by stack.sh from deploy/.env
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.60
+    restart: unless-stopped
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    ports: ["127.0.0.1:56686:16686", "127.0.0.1:54318:4318"]
+
+  # Prometheus and Grafana use the host network so they can scrape the host processes on 127.0.0.1.
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    restart: unless-stopped
+    network_mode: host
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --web.listen-address=127.0.0.1:59090
+      - --storage.tsdb.retention.time=15d
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - promdata:/prometheus
+
+  grafana:
+    image: grafana/grafana:11.2.0
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      GF_SERVER_HTTP_ADDR: 127.0.0.1
+      GF_SERVER_HTTP_PORT: "53000"
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+      GF_AUTH_DISABLE_LOGIN_FORM: "true"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafanadata:/var/lib/grafana
+
+volumes:
+  pgdata:
+  s3data:
+  promdata:
+  grafanadata:

@@ -1,0 +1,6 @@
+order_id,customer_id,status,amount
+1001,C01,paid,19.99
+1002,C02,paid,"1,200.00"
+1003,C01,cancelled,5.00
+1004,C03,paid,7.50
+1005,C01,paid,0.01

@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.egg-info/
+.pytest_cache/
+runs/
+.env
+*.secrets.env
+deploy/.env
+deploy/s3.json
