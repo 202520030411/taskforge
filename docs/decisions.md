@@ -52,6 +52,7 @@ D-001 to D-004 were first taken from the plan's recommendations, marked provisio
 
 ## D-010 File language (2026-11-16, owner)
 **Decision.** Everything in this repository is in English.
+**Exception (2026-11-19).** `README.zh.md` is a Chinese copy of `README.md`; the two link to each other and change together.
 
 ## D-011 Overlap thresholds (2026-11-16, P1)
 **Decision.** 5-word pieces, score = larger of the two containment shares, OVERLAP at 0.15 (or identical text), GREY from 0.05. An empty benchmark index raises instead of reporting "clean".

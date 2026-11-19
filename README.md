@@ -1,5 +1,7 @@
 # TaskForge
 
+**English** | [中文](README.zh.md)
+
 A small data-production platform whose first workflow is failure-driven task synthesis for coding agents: mine a weak model's bad patterns from strong/weak trajectory pairs, generate terminal tasks that target each pattern, and accept a task only after executed gates (oracle, initial state, hack, leak, difficulty) and human review.
 
 **Status:** P3 pilot done (2026-11-17): the first run on real models (Claude Opus 5.5 for every role, Qwen3-Coder-30B as the weak model) produced 6 accepted tasks from 10 proposals for $27.09 ([docs/pilot_report.md](docs/pilot_report.md)). P4 load test and failure drills done the same day on fake models: 128 attempts at once on one 16-core VM, and seven drills that found and fixed seven faults ([docs/load_test.md](docs/load_test.md)). On 2026-11-18 the bottleneck the load test found (deleting containers, 1-3 s each, on every attempt's path) was moved to the background: 47 attempts a minute instead of 31.5 at 16 at once, 243 instead of 196 at 128 (D-043). The paid P4 scale run was dropped: this is a platform project and the numbers it would add were already measured (D-042).
